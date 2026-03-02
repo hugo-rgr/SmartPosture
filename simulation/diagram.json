@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "author": "Anonymous maker",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": -143.4, "left": 47.4, "attrs": {} },
+    { "type": "wokwi-mpu6050", "id": "imu1", "top": 138.22, "left": 280.72, "attrs": {} }
+  ],
+  "connections": [ [ "imu1:SDA", "uno:A4", "green", [ "v0" ] ], [ "imu1:SCL", "uno:A5", "magenta", [ "v0" ] ] ],
+  "dependencies": {}
+}
