@@ -1,0 +1,89 @@
+{
+  "info": {
+    "_postman_id": "469890f9-88bc-451a-8f85-3fdaab470c0a",
+    "name": "SmartPosture",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "27527112"
+  },
+  "item": [
+    {
+      "name": "one sensor data",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"timestamp\": 12692,\r\n    \"sensorHigh\": {\r\n        \"accX\": 0.00,\r\n        \"accY\": 0.00,\r\n        \"accZ\": 9.81,\r\n        \"gyrX\": 0.00,\r\n        \"gyrY\": 1.92,\r\n        \"gyrZ\": 0.00\r\n    },\r\n    \"sensorLow\": {\r\n        \"accX\": 0.00,\r\n        \"accY\": 0.00,\r\n        \"accZ\": 12.75,\r\n        \"gyrX\": 0.52,\r\n        \"gyrY\": 0.09,\r\n        \"gyrZ\": 2.79\r\n    }\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/sensors/readings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "sensors",
+            "readings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "all sensors datas",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/sensors/readings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "sensors",
+            "readings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "one sensor datas by id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/sensors/readings/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "sensors",
+            "readings",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "69a5af4cc9f913279d5fd9b6"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
