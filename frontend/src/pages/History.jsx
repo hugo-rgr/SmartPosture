@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import {fetchWithAuth} from "../utils/api.js";
 
 export default function History() {
   const [history, setHistory] = useState([]);
@@ -10,7 +11,7 @@ export default function History() {
   });
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/sensor-data/history')
+    fetchWithAuth('http://localhost:3001/api/sensor-data/history')
       .then(res => res.json())
       .then(data => setHistory(data))
       .catch(err => console.error(err));

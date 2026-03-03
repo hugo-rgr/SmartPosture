@@ -6,7 +6,15 @@ export default function useWebSocket(url) {
   const wsRef = useRef(null);
 
   useEffect(() => {
-    const ws = new WebSocket(url);
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      console.error('Pas de token JWT');
+      return;
+    }
+
+    const wsUrl = `${url}?token=${token}`;
+    const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {

@@ -1,6 +1,23 @@
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 export default function Layout() {
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
@@ -20,6 +37,20 @@ export default function Layout() {
                   Statistiques
                 </Link>
               </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-500">
+                {user?.firstName} {user?.lastName} ({user?.role})
+              </span>
+              <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
+                {user?.firstName?.[0]}{user?.lastName?.[0]}
+              </div>
+              <button
+                onClick={handleLogout}
+                className="ml-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium"
+              >
+                Déconnexion
+              </button>
             </div>
           </div>
         </div>
