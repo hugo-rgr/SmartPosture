@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     MONGO_DB_NAME: str = "safewear"
 
     # JWT
-    JWT_SECRET_KEY: str = "secret!secret!"
+    JWT_SECRET_KEY: str = "change-this-secret-in-production"
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     MQTT_TOPIC: str = "safewear/+/capteurs"
 
     # Kafka
-    KAFKA_ENABLED: bool = False
+    KAFKA_ENABLED: bool = True
     KAFKA_BOOTSTRAP_SERVERS: str = "localhost:9092"
     KAFKA_TOPIC_POSTURE: str = "posture.created"
     KAFKA_CONSUMER_GROUP: str = "report-consumer-group"
