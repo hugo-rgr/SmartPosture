@@ -1,3 +1,6 @@
 .idea/
-./bridge/node_modules/
-./simulation/.pio/
+bridge/node_modules/
+bridge/.env
+bridge/.vscode/
+simulation/.pio/
+.vscode/
