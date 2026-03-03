@@ -7,11 +7,12 @@ export default function History() {
   const [filters, setFilters] = useState({
     date: '',
     activity: 'all',
-    posture: 'all'
+    posture: 'all',
+    giletId: ''
   });
 
   useEffect(() => {
-    fetchWithAuth('http://localhost:3001/api/sensor-data/history')
+    fetchWithAuth('http://localhost:8000/api/v1/postures')
       .then(res => res.json())
       .then(data => setHistory(data))
       .catch(err => console.error(err));
@@ -36,6 +37,7 @@ export default function History() {
   };
 
   const filteredHistory = history.filter(item => {
+    if (filters.giletId && !item.id?.toLowerCase().includes(filters.giletId.toLowerCase())) return false;
     if (filters.posture !== 'all' && item.posture !== filters.posture) return false;
     if (filters.activity !== 'all' && item.activity !== filters.activity) return false;
     return true;
@@ -46,7 +48,7 @@ export default function History() {
 
       {/* Filtres */}
       <div className="bg-white rounded-lg shadow p-4">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
             <input
@@ -54,6 +56,16 @@ export default function History() {
               value={filters.date}
               onChange={(e) => setFilters({...filters, date: e.target.value})}
               className="w-full border border-gray-300 rounded-md px-3 py-2"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Gilet ID</label>
+            <input
+              type="text"
+              placeholder="Rechercher par ID..."
+              value={filters.giletId}
+              onChange={e => setFilters({...filters, giletId: e.target.value})}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 font-mono"
             />
           </div>
           <div>
@@ -102,7 +114,7 @@ export default function History() {
           <tbody className="divide-y divide-gray-200">
             {filteredHistory.map((item, index) => {
               const postureInfo = getPostureDisplay(item.posture);
-              const isAlert = item.posture === 'BAD_POSTURE' || item.posture === 'CRITICAL_POSTURE';
+              const isAlert = item.posture === 'BAD_POSTURE';
 
               return (
                 <>
@@ -145,7 +157,7 @@ export default function History() {
                       <td colSpan="7" className="px-6 py-4 bg-gray-50">
                         {/* Capteur Haut */}
                         <div className="mb-4">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2">📍 Capteur Haut (Épaules)</h4>
+                          <h4 className="text-sm font-semibold text-gray-700 mb-2">Capteur Haut (Épaules)</h4>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <p className="text-xs font-medium text-gray-600 mb-1">Accéléromètre (m/s²)</p>
@@ -168,7 +180,7 @@ export default function History() {
 
                         {/* Capteur Bas */}
                         <div className="mb-3">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2">📍 Capteur Bas (Bassin)</h4>
+                          <h4 className="text-sm font-semibold text-gray-700 mb-2">Capteur Bas (Bassin)</h4>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <p className="text-xs font-medium text-gray-600 mb-1">Accéléromètre (m/s²)</p>
