@@ -8,7 +8,7 @@ services:
     container_name: safewear-mongo
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "27019:27017"
     volumes:
       - mongo_data:/data/db
 
