@@ -13,7 +13,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3001/api/auth/login', {
+      const response = await fetch('http://localhost:8000/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials)
@@ -25,8 +25,8 @@ export default function Login() {
         throw new Error(data.message || 'Échec de connexion');
       }
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('token', data.access_token);
+      localStorage.setItem('token_type', data.token_type);
 
       navigate('/');
     } catch (err) {
