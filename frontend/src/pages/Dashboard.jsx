@@ -1,0 +1,184 @@
+import { useState, useEffect } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import useWebSocket from '../utils/useWebSocket';
+
+export default function Dashboard() {
+  const { data, isConnected } = useWebSocket('ws://localhost:3001');
+  const [chartData, setChartData] = useState([]);
+  const [currentData, setCurrentData] = useState(null);
+
+  useEffect(() => {
+    if (data) {
+      setCurrentData(data);
+      setChartData(prev => [...prev.slice(-59), {
+        time: new Date(data.timestamp).toLocaleTimeString(),
+        angle_diff: data.angle_diff || 0
+      }]);
+    }
+  }, [data]);
+
+  const getPostureDisplay = (posture) => {
+    switch(posture) {
+      case 'GOOD_POSTURE': return { label: 'Bonne', color: 'green', emoji: '🟢' };
+      case 'BAD_POSTURE': return { label: 'Mauvaise', color: 'red', emoji: '🔴' };
+      default: return { label: posture, color: 'gray', emoji: '⚪' };
+    }
+  };
+
+  const getActivityDisplay = (activity) => {
+    switch(activity) {
+      case 'STAND_UP': return 'Debout';
+      case 'SIT_DOWN': return 'Assis';
+      case 'LAY_DOWN': return 'Couché';
+      case 'UNKNOWN': return 'Inconnu';
+      default: return 'Inconnu';
+    }
+  };
+
+  const postureInfo = getPostureDisplay(currentData?.posture);
+  const isAlert = currentData?.posture === 'BAD_POSTURE';
+
+  return (
+    <div className="space-y-6">
+      {/* En-tête */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-3xl font-bold text-gray-900">Dashboard Temps Réel</h2>
+        <div className="flex items-center space-x-2">
+          <div className={`h-3 w-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+          <span className="text-sm text-gray-600">{isConnected ? 'Connecté' : 'Déconnecté'}</span>
+        </div>
+      </div>
+
+      {/* Cards État Gilet */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Carte Gilet */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Gilet</p>
+              <p className="text-2xl font-semibold text-gray-900">{currentData?.id || 'gilet_01'}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Carte Activité */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <p className="text-sm text-gray-500">Activité</p>
+          <div className="mt-2 flex items-center space-x-2">
+            <p className="text-2xl font-bold text-gray-900">
+              {getActivityDisplay(currentData?.activity) || 'N/A'}
+            </p>
+          </div>
+          <p className="mt-2 text-sm text-gray-600">Détectée automatiquement</p>
+        </div>
+
+        {/* Carte Différence Angle */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <p className="text-sm text-gray-500">Différence Angle</p>
+          <div className="mt-2 flex items-end space-x-2">
+            <p className="text-4xl font-bold text-gray-900">
+              {currentData?.angle_diff?.toFixed(2) || '0.00'}
+            </p>
+            <p className="text-lg text-gray-500 pb-1">°</p>
+          </div>
+          <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
+            <div
+              className={`h-2 rounded-full ${
+                (currentData?.angle_diff || 0) <= 10 ? 'bg-green-500' : 
+                (currentData?.angle_diff || 0) <= 25 ? 'bg-yellow-500' : 'bg-red-500'
+              }`}
+              style={{ width: `${Math.min((currentData?.angle_diff || 0) * 2, 100)}%` }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Carte Posture Actuelle */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <p className="text-sm text-gray-500">Posture Actuelle</p>
+          <div className="mt-2 flex items-center space-x-3">
+            <span className={`inline-flex items-center justify-center w-3 h-3 rounded-full ${postureInfo.color === 'green' ? 'bg-green-500' : postureInfo.color === 'red' ? 'bg-red-500' : 'bg-gray-400'}`}></span>
+            <span className="text-sm font-medium">{postureInfo.label}</span>
+          </div>
+          {isAlert && (
+            <p className="mt-2 text-sm text-red-600 font-medium">⚠️ Alerte active</p>
+          )}
+        </div>
+      </div>
+
+      {/* Graphique Temps Réel */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Différence d'Angle en Temps Réel</h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="time" label={{ value: 'Temps'}} />
+            <YAxis label={{ value: 'Degrés (°)', angle: -90, position: 'insideLeft' }} />
+            <Tooltip />
+            <Line type="monotone" dataKey="angle_diff" stroke="#3b82f6" name="Différence angle" strokeWidth={2} />
+          </LineChart>
+        </ResponsiveContainer>
+        <div className="mt-4 flex justify-center space-x-6 text-sm text-gray-600">
+          <div className="flex items-center space-x-2">
+            <div className="h-3 w-3 bg-green-500 rounded"></div>
+            <span>Bonne posture</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="h-3 w-3 bg-red-500 rounded"></div>
+            <span>Mauvaise posture (&gt;25°)</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Données Brutes - 2 capteurs */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Données Capteurs en Direct</h3>
+
+        {/* Capteur Haut */}
+        <div className="mb-6">
+          <h4 className="text-md font-medium text-gray-700 mb-3">Capteur Haut (Épaules)</h4>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-2">Accéléromètre (m/s²)</p>
+              <div className="bg-blue-50 rounded p-3 font-mono text-sm">
+                <div>X: {currentData?.sensorHigh?.accX?.toFixed(2) || '0.00'}</div>
+                <div>Y: {currentData?.sensorHigh?.accY?.toFixed(2) || '0.00'}</div>
+                <div>Z: {currentData?.sensorHigh?.accZ?.toFixed(2) || '0.00'}</div>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-2">Gyroscope (°/s)</p>
+              <div className="bg-blue-50 rounded p-3 font-mono text-sm">
+                <div>X: {currentData?.sensorHigh?.gyrX?.toFixed(2) || '0.00'}</div>
+                <div>Y: {currentData?.sensorHigh?.gyrY?.toFixed(2) || '0.00'}</div>
+                <div>Z: {currentData?.sensorHigh?.gyrZ?.toFixed(2) || '0.00'}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Capteur Bas */}
+        <div>
+          <h4 className="text-md font-medium text-gray-700 mb-3">Capteur Bas (Bassin)</h4>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-2">Accéléromètre (m/s²)</p>
+              <div className="bg-green-50 rounded p-3 font-mono text-sm">
+                <div>X: {currentData?.sensorLow?.accX?.toFixed(2) || '0.00'}</div>
+                <div>Y: {currentData?.sensorLow?.accY?.toFixed(2) || '0.00'}</div>
+                <div>Z: {currentData?.sensorLow?.accZ?.toFixed(2) || '0.00'}</div>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-2">Gyroscope (°/s)</p>
+              <div className="bg-green-50 rounded p-3 font-mono text-sm">
+                <div>X: {currentData?.sensorLow?.gyrX?.toFixed(2) || '0.00'}</div>
+                <div>Y: {currentData?.sensorLow?.gyrY?.toFixed(2) || '0.00'}</div>
+                <div>Z: {currentData?.sensorLow?.gyrZ?.toFixed(2) || '0.00'}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
