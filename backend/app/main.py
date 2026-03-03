@@ -2,13 +2,13 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.database import connect_db, close_db
 from app.controllers.auth_controller import router as auth_router
 from app.controllers.posture_controller import router as posture_router
 from app.controllers.report_controller import router as report_router
+from app.controllers.ws_controller import router as ws_router
 from app.mqtt.client import mqtt, init_mqtt_handlers
 from app.services.posture_service import PostureService
 from app.services.report_service import ReportService
@@ -35,17 +35,10 @@ app = FastAPI(
     version="2.0.0",
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 app.include_router(auth_router,    prefix="/api/v1")
 app.include_router(posture_router, prefix="/api/v1")
 app.include_router(report_router,  prefix="/api/v1")
+app.include_router(ws_router)  # pas de prefix /api/v1 — ws:// n'utilise pas ce schéma
 
 
 @app.get("/", tags=["Health"])
