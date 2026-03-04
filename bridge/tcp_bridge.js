@@ -40,9 +40,11 @@ function setupTcpClient(tcpPort) {
                             console.warn(`- Warning: Received data without 'id' field from port ${tcpPort}. Ignoring this entry.`);
                             return;
                         }
+                        data.timestamp = Date.now(); // On met à jour le timestamp pour qu'il soit synchro pour les différents gilets
                         const updatedTopic = TOPIC_TEMPLATE.replace('gilet_id', data.id || 'unknown');
-                        mqttClient.publish(updatedTopic, cleanLine);
-                        console.log(`- [TCP ${tcpPort} -> MQTT] :`, cleanLine);
+                        const updatedData = JSON.stringify(data);
+                        mqttClient.publish(updatedTopic, updatedData);
+                        console.log(`- [TCP ${tcpPort} -> MQTT] :`, updatedData);
                     } catch (error) {
                         console.error(`- Error parsing JSON data from port ${tcpPort}:`, error.message);
                     }
