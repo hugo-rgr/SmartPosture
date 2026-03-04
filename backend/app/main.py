@@ -2,7 +2,6 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.database import connect_db, close_db
@@ -10,7 +9,7 @@ from app.controllers.auth_controller import router as auth_router
 from app.controllers.posture_controller import router as posture_router
 from app.controllers.report_controller import router as report_router
 from app.controllers.ws_controller import router as ws_router
-from app.mqtt.client import mqtt, init_mqtt_handlers
+from app.mqtt.client import mqtt, init_mqtt_handlers, start_watchdog, stop_watchdog
 from app.services.posture_service import PostureService
 from app.services.report_service import ReportService
 from app.kafka.producer import start_producer, stop_producer, publish_posture_created
@@ -33,14 +32,6 @@ app = FastAPI(
     title="SafeWear Posture API",
     description="API REST pour la collecte et la consultation des données de posture des gilets SafeWear.",
     version="2.0.0",
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
 )
 
 app.include_router(auth_router,    prefix="/api/v1")
@@ -87,7 +78,7 @@ async def startup():
         await mqtt.mqtt_startup()
 
         mqtt.init_app(app)
-
+        await start_watchdog()
         mqtt_connected = True
         logger.info(f"[MQTT] Connecté à {settings.MQTT_HOST}:{settings.MQTT_PORT}")
     else:
@@ -98,6 +89,7 @@ async def startup():
 async def shutdown():
     logger.info("Arrêt de l'application...")
     if mqtt_connected:
+        await stop_watchdog()
         await mqtt.mqtt_shutdown()
     if kafka_enabled:
         await stop_consumer()

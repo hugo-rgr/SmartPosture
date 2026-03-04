@@ -1,5 +1,7 @@
+import asyncio
 import json
 import logging
+import time
 
 from fastapi_mqtt import FastMQTT, MQTTConfig
 
@@ -18,6 +20,55 @@ mqtt_config = MQTTConfig(
 
 mqtt = FastMQTT(config=mqtt_config)
 
+_last_seen: dict[str, float] = {}
+GILET_TIMEOUT_SECONDS = 5
+_watchdog_task: asyncio.Task = None
+
+
+async def _watchdog_loop():
+    from app.websocket.manager import manager
+
+    while True:
+        await asyncio.sleep(1)
+        now = time.time()
+
+        for gilet_id, last_seen in list(_last_seen.items()):
+            elapsed = now - last_seen
+            if elapsed >= GILET_TIMEOUT_SECONDS:
+                logger.warning(
+                    f"[Watchdog] Gilet '{gilet_id}' silencieux depuis "
+                    f"{elapsed:.1f}s → broadcast DISCONNECTED"
+                )
+                await manager.broadcast({
+                    "id":         gilet_id,
+                    "status":     "DISCONNECTED",
+                    "last_seen":  last_seen,
+                    "silent_for": round(elapsed, 1),
+                    "timestamp":  None,
+                    "activity":   None,
+                    "posture":    None,
+                    "angle_diff": None,
+                    "sensorHigh": None,
+                    "sensorLow":  None,
+                })
+
+
+async def start_watchdog():
+    global _watchdog_task
+    _watchdog_task = asyncio.create_task(_watchdog_loop())
+    logger.info(f"[Watchdog] Démarré (timeout={GILET_TIMEOUT_SECONDS}s)")
+
+
+async def stop_watchdog():
+    global _watchdog_task
+    if _watchdog_task and not _watchdog_task.done():
+        _watchdog_task.cancel()
+        try:
+            await _watchdog_task
+        except asyncio.CancelledError:
+            pass
+    logger.info("[Watchdog] Arrêté")
+
 
 def init_mqtt_handlers(posture_service, kafka_producer_fn=None):
 
@@ -29,17 +80,21 @@ def init_mqtt_handlers(posture_service, kafka_producer_fn=None):
 
     @mqtt.on_message()
     async def on_message(client, topic, payload, qos, properties):
+        from app.websocket.manager import manager
+
         try:
             data = json.loads(payload.decode("utf-8"))
             gilet_id = data.get("id")
             logger.info(f"[MQTT] Message reçu sur '{topic}': gilet={gilet_id}")
 
+            _last_seen[gilet_id] = time.time()
+
             posture_id, gilet_id, date_key = await posture_service.save_posture(data)
             logger.info(f"[MQTT] Posture sauvegardée (id={posture_id})")
 
-            from app.websocket.manager import manager
             ws_payload = {
                 "id":         data.get("id"),
+                "status":     "CONNECTED",
                 "timestamp":  data.get("timestamp"),
                 "activity":   data.get("activity"),
                 "posture":    data.get("posture"),

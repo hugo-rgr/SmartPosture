@@ -7,11 +7,10 @@ from app.core.database import get_database
 from app.schemas.posture import PostureResponseSchema, PostureListResponseSchema
 
 
-def _build_timestamp() -> tuple[int, str]:
+def _build_date_key() -> str:
     now = datetime.now(timezone.utc)
     date_key = now.strftime("%Y%m%d")
-    timestamp = int(now.timestamp())
-    return timestamp, date_key
+    return date_key
 
 
 def _serialize(doc: dict) -> PostureResponseSchema:
@@ -27,11 +26,11 @@ class PostureService:
     async def save_posture(self, payload: dict) -> tuple[str, str, str]:
         col = self._collection()
 
-        timestamp, date_key = _build_timestamp()
+        date_key = _build_date_key()
 
         doc = {
             "gilet_id":   payload.get("id"),
-            "timestamp":  timestamp,
+            "timestamp":  payload.get("timestamp"),
             "date_key":   date_key,
             "activity":   payload.get("activity"),
             "posture":    payload.get("posture"),
