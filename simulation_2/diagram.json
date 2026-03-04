@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "author": "Anonymous maker",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 125.4, "left": -499.8, "attrs": {} },
+    {
+      "type": "wokwi-mpu6050",
+      "id": "imu1",
+      "top": -5.78,
+      "left": -36.08,
+      "attrs": { "i2cAddress": "0x68" }
+    },
+    {
+      "type": "wokwi-mpu6050",
+      "id": "imu2",
+      "top": 445.42,
+      "left": -84.08,
+      "attrs": { "i2cAddress": "0x69" }
+    }
+  ],
+  "connections": [
+    [ "imu1:SDA", "uno:A4", "green", [ "v0" ] ],
+    [ "imu1:SCL", "uno:A5", "green", [ "v0" ] ],
+    [ "imu2:SDA", "uno:A4", "blue", [ "v0" ] ],
+    [ "imu2:SCL", "uno:A5", "blue", [ "v0" ] ],
+    [ "imu2:AD0", "uno:5V", "red", [ "v0" ] ],
+    [ "imu1:GND", "uno:GND.1", "black", [ "v0" ] ],
+    [ "imu1:VCC", "uno:5V", "red", [ "v0" ] ],
+    [ "imu2:VCC", "uno:5V", "red", [ "v-96", "h-172.72" ] ],
+    [ "imu2:GND", "uno:GND.1", "black", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}
