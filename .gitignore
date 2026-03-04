@@ -1,7 +1,7 @@
 .idea/
-bridge/node_modules/
-bridge/.env
-bridge/.vscode/
+IoT/bridge/node_modules/
+IoT/bridge/.env
+IoT/bridge/.vscode/
 simulation1/.pio/
 simulation2/.pio/
 .vscode/

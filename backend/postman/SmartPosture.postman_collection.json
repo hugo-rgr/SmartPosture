@@ -16,7 +16,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"username\":\"phoo\",\r\n    \"email\": \"ccc@aaa.fr\",\r\n    \"password\": \"cccccccccccccccccccccccccccc\"\r\n}",
+              "raw": "{\r\n    \"username\":\"test\",\r\n    \"email\": \"eee@aaa.fr\",\r\n    \"password\": \"eee\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -47,7 +47,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"username\":\"phoo\",\r\n    \"password\": \"cccccccccccccccccccccccccccc\"\r\n}",
+              "raw": "{\r\n    \"username\":\"test\",\r\n    \"password\": \"eee\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -81,6 +81,55 @@
           "request": {
             "method": "GET",
             "header": [],
+            "url": {
+              "raw": "http://localhost:8000/api/v1/postures/?gilet_id=gilet_02&date_key=20260304&posture=BAD_POSTURE&activity=STAND_UP",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8000",
+              "path": [
+                "api",
+                "v1",
+                "postures",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "gilet_id",
+                  "value": "gilet_02"
+                },
+                {
+                  "key": "date_key",
+                  "value": "20260304"
+                },
+                {
+                  "key": "posture",
+                  "value": "BAD_POSTURE"
+                },
+                {
+                  "key": "activity",
+                  "value": "STAND_UP"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "one posture",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"id\": \"gilet_01\",\r\n  \"activity\": \"STAND_UP\",\r\n  \"posture\": \"GOOD_POSTURE\",\r\n  \"angle_diff\": 2.5,\r\n  \"sensorHigh\": {\r\n    \"accX\": 0.00, \"accY\": 0.00, \"accZ\": 9.81,\r\n    \"gyrX\": 0.00, \"gyrY\": 0.00, \"gyrZ\": 0.00\r\n  },\r\n  \"sensorLow\": {\r\n    \"accX\": 0.00, \"accY\": 0.00, \"accZ\": 9.81,\r\n    \"gyrX\": 0.00, \"gyrY\": 0.00, \"gyrZ\": 0.00\r\n  }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "http://localhost:8000/api/v1/postures/",
               "protocol": "http",
@@ -158,7 +207,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:8000/api/v1/reports",
+              "raw": "http://localhost:8000/api/v1/report/:id/:date/recompute",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -167,13 +216,34 @@
               "path": [
                 "api",
                 "v1",
-                "reports"
+                "report",
+                ":id",
+                ":date",
+                "recompute"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                },
+                {
+                  "key": "date",
+                  "value": ""
+                }
               ]
             }
           },
           "response": []
         }
       ]
+    },
+    {
+      "name": "New Request",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
     }
   ],
   "auth": {
@@ -181,7 +251,7 @@
     "bearer": [
       {
         "key": "token",
-        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwaG9vIiwiZXhwIjoxNzcyNTUwMDU5fQ.mhfH-5y7KxNWknlTek1Ad-Wt_WOQByq-Uvw-K4xXEhI",
+        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0IiwiZXhwIjoxNzcyNjM2MDMzfQ.-pfp8k4CJFhkRj_JzlMxhKRXFMDwwGg2L7l7x1EWC7c",
         "type": "string"
       }
     ]

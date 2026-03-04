@@ -47,7 +47,7 @@ SmartPosture/
 - Node.js (v18+)
 - npm
 
-### Backend & Frontend
+### Backend
 
 à la racine du projet
 ```bash
@@ -58,7 +58,16 @@ Services démarrés :
 - **MongoDB** : port 27019
 - **Kafka** : port 9092
 - **API** : port 8000
-- **Frontend** : port 5173 accessible sur http://localhost:5173
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Accessible sur http://localhost:5173
 
 ### Simulation des gilets
 ---
@@ -347,6 +356,10 @@ Activités détectées :
 - `STAND_UP` : Debout
 - `SIT_DOWN` : Assis
 - `LAY_DOWN` : Couché
+
+Modifier les postures pour simuler l'activité des gilets:
+Dans le répetoire `IoT` le fichier `setPosture.json` donne les configurations des capteurs (valeurs des axes x, y et z pour l'accéléromètre & gyroscope)
+Il faut sélectionner le capteur haut (mpu1), modifier les valeurs selon la posture ciblé ; puis les valeurs du capteur bas (mpu2)
 
 ## Licence
 
