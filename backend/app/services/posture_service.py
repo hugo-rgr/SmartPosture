@@ -7,16 +7,18 @@ from app.core.database import get_database
 from app.schemas.posture import PostureResponseSchema, PostureListResponseSchema
 
 
-def _build_timestamp(raw_timestamp: int) -> tuple[int, str]:
+def _build_timestamp() -> tuple[int, str]:
     """
-    Enrichit le timestamp reçu du broker.
-    Préfixe avec YYYYMMDD du jour courant.
-    Ex: raw=9999, date=20260303 → timestamp=202603039999, date_key="20260303"
+    Génère un timestamp à la seconde au moment de l'enregistrement en base.
+    Le timestamp du broker est ignoré et écrasé.
+    Ex: datetime.now() = 2026-03-03 14:32:07 UTC
+        → timestamp = 1741012327 (Unix secondes)
+        → date_key  = "20260303"
     """
     now = datetime.now(timezone.utc)
-    date_key = now.strftime("%Y%m%d")           # "20260303"
-    enriched = int(f"{date_key}{raw_timestamp}") # 202603039999
-    return enriched, date_key
+    date_key = now.strftime("%Y%m%d")
+    timestamp = int(now.timestamp())   # Unix timestamp à la seconde
+    return timestamp, date_key
 
 
 def _serialize(doc: dict) -> PostureResponseSchema:
@@ -36,12 +38,11 @@ class PostureService:
         """
         col = self._collection()
 
-        raw_ts = payload.get("timestamp", 0)
-        enriched_ts, date_key = _build_timestamp(raw_ts)
+        timestamp, date_key = _build_timestamp()
 
         doc = {
             "gilet_id":   payload.get("id"),
-            "timestamp":  enriched_ts,
+            "timestamp":  timestamp,
             "date_key":   date_key,
             "activity":   payload.get("activity"),
             "posture":    payload.get("posture"),
