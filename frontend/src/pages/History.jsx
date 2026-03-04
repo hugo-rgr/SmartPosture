@@ -195,7 +195,7 @@ export default function History() {
                       <td colSpan="6" className="px-6 py-4 bg-gray-50">
                         {/* Capteur Haut */}
                         <div className="mb-4">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2">Capteur Haut (Épaules)</h4>
+                          <h4 className="text-sm font-semibold text-gray-700 mb-2">Capteur Haut (Omoplates)</h4>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <p className="text-xs font-medium text-gray-600 mb-1">Accéléromètre (m/s²)</p>
@@ -218,7 +218,7 @@ export default function History() {
 
                         {/* Capteur Bas */}
                         <div className="mb-3">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2">Capteur Bas (Bassin)</h4>
+                          <h4 className="text-sm font-semibold text-gray-700 mb-2">Capteur Bas (Lombaires)</h4>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <p className="text-xs font-medium text-gray-600 mb-1">Accéléromètre (m/s²)</p>

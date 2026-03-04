@@ -200,7 +200,7 @@ export default function Dashboard() {
 
         {/* Capteur Haut */}
         <div className="mb-6">
-          <h4 className="text-md font-medium text-gray-700 mb-3">Capteur Haut (Épaules)</h4>
+          <h4 className="text-md font-medium text-gray-700 mb-3">Capteur Haut (Omoplates)</h4>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-2">Accéléromètre (m/s²)</p>
@@ -223,7 +223,7 @@ export default function Dashboard() {
 
         {/* Capteur Bas */}
         <div>
-          <h4 className="text-md font-medium text-gray-700 mb-3">Capteur Bas (Bassin)</h4>
+          <h4 className="text-md font-medium text-gray-700 mb-3">Capteur Bas (Lombaires)</h4>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-2">Accéléromètre (m/s²)</p>
