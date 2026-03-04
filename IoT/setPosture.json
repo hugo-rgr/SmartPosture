@@ -1,0 +1,117 @@
+[
+  {
+    "id": "gilet_01",
+    "timestamp": 1000,
+    "activity": "STAND_UP",
+    "posture": "GOOD_POSTURE",
+    "angle_diff": 0.00,
+    "sensorHigh": {
+      "accX": 0.00,
+      "accY": 0.00,
+      "accZ": 9.81,
+      "gyrX": 0.00,
+      "gyrY": 0.00,
+      "gyrZ": 0.00
+    },
+    "sensorLow": {
+      "accX": 0.00,
+      "accY": 0.00,
+      "accZ": 9.81,
+      "gyrX": 0.00,
+      "gyrY": 0.00,
+      "gyrZ": 0.00
+    }
+  },
+  {
+    "id": "gilet_01",
+    "timestamp": 4000,
+    "activity": "STAND_UP",
+    "posture": "BAD_POSTURE",
+    "angle_diff": 30.00,
+    "sensorHigh": {
+      "accX": -6.30,
+      "accY": 0.00,
+      "accZ": 7.50,
+      "gyrX": 0.00,
+      "gyrY": 0.00,
+      "gyrZ": 0.00
+    },
+    "sensorLow": {
+      "accX": -1.70,
+      "accY": 0.00,
+      "accZ": 9.60,
+      "gyrX": 0.00,
+      "gyrY": 0.00,
+      "gyrZ": 0.00
+    }
+  },
+  {
+    "id": "gilet_01",
+    "timestamp": 7000,
+    "activity": "SIT_DOWN",
+    "posture": "GOOD_POSTURE",
+    "angle_diff": 0.00,
+    "sensorHigh": {
+      "accX": -9.81,
+      "accY": 0.00,
+      "accZ": 0.00,
+      "gyrX": 0.00,
+      "gyrY": 0.00,
+      "gyrZ": 0.00
+    },
+    "sensorLow": {
+      "accX": -9.81,
+      "accY": 0.00,
+      "accZ": 0.00,
+      "gyrX": 0.00,
+      "gyrY": 0.00,
+      "gyrZ": 0.00
+    }
+  },
+  {
+    "id": "gilet_01",
+    "timestamp": 10000,
+    "activity": "SIT_DOWN",
+    "posture": "BAD_POSTURE",
+    "angle_diff": 94.00,
+    "sensorHigh": {
+      "accX": -3.30,
+      "accY": 0.00,
+      "accZ": -9.20,
+      "gyrX": 0.00,
+      "gyrY": 0.00,
+      "gyrZ": 0.00
+    },
+    "sensorLow": {
+      "accX": -9.00,
+      "accY": 0.00,
+      "accZ": 3.90,
+      "gyrX": 0.00,
+      "gyrY": 0.00,
+      "gyrZ": 0.00
+    }
+  },
+  {
+    "id": "gilet_01",
+    "timestamp": 13000,
+    "activity": "LAY_DOWN",
+    "posture": "GOOD_POSTURE",
+    "angle_diff": 0.00,
+    "sensorHigh": {
+      "accX": 0.00,
+      "accY": 9.81,
+      "accZ": 0.10,
+      "gyrX": 0.00,
+      "gyrY": 0.00,
+      "gyrZ": 0.00
+    },
+    "sensorLow": {
+      "accX": 0.00,
+      "accY": 9.81,
+      "accZ": 0.10,
+      "gyrX": 0.00,
+      "gyrY": 0.00,
+      "gyrZ": 0.00
+    }
+  }
+]
