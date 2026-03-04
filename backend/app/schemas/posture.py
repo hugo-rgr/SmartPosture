@@ -11,10 +11,20 @@ class SensorDataSchema(BaseModel):
     gyrZ: float
 
 
+class PostureCreateSchema(BaseModel):
+    id: str
+    activity: str
+    posture: str
+    angle_diff: float
+    sensorHigh: SensorDataSchema
+    sensorLow: SensorDataSchema
+
+
 class PostureResponseSchema(BaseModel):
     id: Optional[str] = None
     gilet_id: str
     timestamp: int
+    date_key: str
     activity: str
     posture: str
     angle_diff: float
