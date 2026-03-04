@@ -2,5 +2,6 @@
 bridge/node_modules/
 bridge/.env
 bridge/.vscode/
-simulation/.pio/
+simulation1/.pio/
+simulation2/.pio/
 .vscode/
