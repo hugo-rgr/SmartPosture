@@ -21,7 +21,7 @@ mqtt_config = MQTTConfig(
 mqtt = FastMQTT(config=mqtt_config)
 
 _last_seen: dict[str, float] = {}
-GILET_TIMEOUT_SECONDS = 5
+GILET_TIMEOUT_SECONDS = 10
 _watchdog_task: asyncio.Task = None
 
 
