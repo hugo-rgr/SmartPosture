@@ -4,27 +4,50 @@ import useWebSocket from '../utils/useWebSocket';
 
 export default function Dashboard() {
   const { data, isConnected } = useWebSocket('ws://localhost:8000/ws/posture');
-  const [chartData, setChartData] = useState([]);
-  const [currentData, setCurrentData] = useState(null);
+  // Stocke l'historique des données par gilet
+  const [giletData, setGiletData] = useState({}); // { [giletId]: [data, ...] }
   const [selectedId, setSelectedId] = useState('gilet_01');
   const [availableIds, setAvailableIds] = useState(['gilet_01']);
 
   useEffect(() => {
     if (data) {
-      // Met à jour la liste des gilet_id disponibles dynamiquement
-      if (data.id && !availableIds.includes(data.id)) {
-        setAvailableIds(prev => [...prev, data.id]);
-      }
-      // Filtre les données selon le gilet_id sélectionné
-      if (data.id === selectedId) {
-        setCurrentData(data);
-        setChartData(prev => [...prev.slice(-59), {
-          time: new Date(data.timestamp).toLocaleTimeString(),
-          angle_diff: data.angle_diff || 0
-        }]);
+      // Ajoute dynamiquement les nouveaux gilets détectés
+      if (data.id) {
+        setAvailableIds(prev => prev.includes(data.id) ? prev : [...prev, data.id]);
+        // Met à jour l'historique du gilet concerné
+        setGiletData(prev => {
+          const prevArr = prev[data.id] || [];
+          return {
+            ...prev,
+            [data.id]: [
+              ...prevArr.slice(-59),
+              data
+            ]
+          };
+        });
       }
     }
-  }, [data, selectedId, availableIds]);
+  }, [data]);
+
+  // Données du gilet sélectionné
+  const selectedGiletData = giletData[selectedId] || [];
+  const currentData = selectedGiletData.length > 0 ? selectedGiletData[selectedGiletData.length - 1] : null;
+  const chartData = selectedGiletData.map(d => ({
+    time: new Date(d.timestamp).toLocaleTimeString(),
+    angle_diff: d.angle_diff || 0,
+    posture: d.posture || null
+  }));
+
+  // Fonction pour colorer les points selon la posture
+  const customDot = (props) => {
+    const { cx, cy, payload } = props;
+    let fill = '#d1d5db'; // gris par défaut
+    if (payload.posture === 'GOOD_POSTURE') fill = '#22c55e'; // vert
+    if (payload.posture === 'BAD_POSTURE') fill = '#ef4444'; // rouge
+    return (
+      <circle cx={cx} cy={cy} r={5} fill={fill} stroke="#fff" strokeWidth={1} />
+    );
+  };
 
   const getPostureDisplay = (posture) => {
     switch(posture) {
@@ -79,7 +102,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Gilet</p>
-              <p className="text-2xl font-semibold text-gray-900">{currentData?.id || 'gilet_01'}</p>
+              <p className="text-2xl font-semibold text-gray-900">{currentData?.id || selectedId}</p>
             </div>
           </div>
         </div>
@@ -107,8 +130,7 @@ export default function Dashboard() {
           <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
             <div
               className={`h-2 rounded-full ${
-                (currentData?.angle_diff || 0) <= 10 ? 'bg-green-500' : 
-                (currentData?.angle_diff || 0) <= 25 ? 'bg-yellow-500' : 'bg-red-500'
+                (currentData?.angle_diff || 0) <= 25 ? 'bg-green-500' : 'bg-red-500'
               }`}
               style={{ width: `${Math.min((currentData?.angle_diff || 0) * 2, 100)}%` }}
             ></div>
@@ -134,10 +156,10 @@ export default function Dashboard() {
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="time" label={{ value: 'Temps'}} />
+            <XAxis dataKey="time" label={{ value: 'Temps', offset: 10, position: 'insideBottom' }} />
             <YAxis label={{ value: 'Degrés (°)', angle: -90, position: 'insideLeft' }} />
             <Tooltip />
-            <Line type="monotone" dataKey="angle_diff" stroke="#3b82f6" name="Différence angle" strokeWidth={2} />
+            <Line type="monotone" dataKey="angle_diff" stroke="#3b82f6" name="Différence angle" strokeWidth={2} dot={customDot} />
           </LineChart>
         </ResponsiveContainer>
         <div className="mt-4 flex justify-center space-x-6 text-sm text-gray-600">
