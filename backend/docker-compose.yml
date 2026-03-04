@@ -1,0 +1,88 @@
+version: "3.9"
+
+services:
+
+  # ─── Infrastructure ───────────────────────────────────────────
+  mongo:
+    image: mongo:7.0
+    container_name: safewear-mongo
+    restart: unless-stopped
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: safewear-zookeeper
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: safewear-kafka
+    restart: unless-stopped
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # INTERNAL : communication entre containers
+      # EXTERNAL : accès depuis ta machine hôte (debug)
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "kafka:29092"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ─── Application ──────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: safewear-api
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+      mongo:
+        condition: service_started
+    ports:
+      - "8000:8000"
+    environment:
+      # MongoDB → nom du service Docker
+      MONGO_URI: mongodb://mongo:27017
+      MONGO_DB_NAME: safewear
+
+      # JWT
+      JWT_SECRET_KEY: change-this-in-production
+      JWT_ALGORITHM: HS256
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: 60
+
+      # MQTT — broker HiveMQ externe, aucun impact Docker
+      MQTT_ENABLED: "true"
+      MQTT_HOST: broker.hivemq.com
+      MQTT_PORT: 1883
+      MQTT_SSL: "false"
+      MQTT_USERNAME: ""
+      MQTT_PASSWORD: ""
+      MQTT_TOPIC: "safewear/+/capteurs"
+
+      # Kafka → nom du service Docker + port INTERNAL
+      KAFKA_ENABLED: "true"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_TOPIC_POSTURE: posture.created
+      KAFKA_CONSUMER_GROUP: report-consumer-group
+
+volumes:
+  mongo_data:
