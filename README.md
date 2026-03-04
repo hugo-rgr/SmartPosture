@@ -47,7 +47,7 @@ SmartPosture/
 - Node.js (v18+)
 - npm
 
-### Backend
+### Backend et Frontend
 
 à la racine du projet
 ```bash
@@ -58,16 +58,7 @@ Services démarrés :
 - **MongoDB** : port 27019
 - **Kafka** : port 9092
 - **API** : port 8000
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Accessible sur http://localhost:5173
+- **Frontend** : port 5173
 
 ### Simulation des gilets
 ---

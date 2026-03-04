@@ -80,5 +80,16 @@ services:
       KAFKA_TOPIC_POSTURE: posture.created
       KAFKA_CONSUMER_GROUP: report-consumer-group
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: safewear-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+
 volumes:
   mongo_data:
