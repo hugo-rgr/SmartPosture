@@ -50,7 +50,7 @@ export default function History() {
       case 'STAND_UP': return 'Debout';
       case 'SIT_DOWN': return 'Assis';
       case 'LAY_DOWN': return 'Couché';
-      case 'UNKNOWN': return 'Inconnu';
+      case 'UNKNOWN': return 'Inconnue';
       default: return activity;
     }
   };
@@ -76,6 +76,10 @@ export default function History() {
 
   return (
     <div className="space-y-6">
+
+      <div className="flex justify-between items-center">
+        <h2 className="text-3xl font-bold text-gray-900">Historique</h2>
+      </div>
 
       {/* Filtres */}
       <div className="bg-white rounded-lg shadow p-4">
@@ -119,7 +123,7 @@ export default function History() {
               <option value="STAND_UP">Debout</option>
               <option value="SIT_DOWN">Assis</option>
               <option value="LAY_DOWN">Couché</option>
-              <option value="UNKNOWN">Inconnu</option>
+              <option value="UNKNOWN">Inconnue</option>
             </select>
           </div>
           <div>
