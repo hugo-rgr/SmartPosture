@@ -2,7 +2,6 @@ version: "3.9"
 
 services:
 
-  # ─── Infrastructure ───────────────────────────────────────────
   mongo:
     image: mongo:7.0
     container_name: safewear-mongo
@@ -45,7 +44,6 @@ services:
       timeout: 5s
       retries: 10
 
-  # ─── Application ──────────────────────────────────────────────
   api:
     build:
       context: .
@@ -60,7 +58,6 @@ services:
     ports:
       - "8000:8000"
     environment:
-      # MongoDB → nom du service Docker
       MONGO_URI: mongodb://mongo:27017
       MONGO_DB_NAME: safewear
 
@@ -69,7 +66,7 @@ services:
       JWT_ALGORITHM: HS256
       JWT_ACCESS_TOKEN_EXPIRE_MINUTES: 60
 
-      # MQTT — broker HiveMQ externe, aucun impact Docker
+      # MQTT
       MQTT_ENABLED: "true"
       MQTT_HOST: broker.hivemq.com
       MQTT_PORT: 1883
@@ -78,7 +75,6 @@ services:
       MQTT_PASSWORD: ""
       MQTT_TOPIC: "safewear/+/capteurs"
 
-      # Kafka → nom du service Docker + port INTERNAL
       KAFKA_ENABLED: "true"
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       KAFKA_TOPIC_POSTURE: posture.created

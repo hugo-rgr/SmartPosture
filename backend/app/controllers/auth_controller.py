@@ -20,7 +20,7 @@ async def register(payload: UserRegisterSchema):
 @router.post(
     "/login",
     response_model=TokenSchema,
-    summary="Se connecter et obtenir un JWT",
+    summary="Se connecter",
 )
 async def login(payload: UserLoginSchema):
     return await auth_service.login(payload)

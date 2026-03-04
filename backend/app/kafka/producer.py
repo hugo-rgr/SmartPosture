@@ -28,10 +28,6 @@ async def stop_producer():
 
 
 async def publish_posture_created(gilet_id: str, date_key: str, posture_id: str):
-    """
-    Publie un événement 'posture.created' sur le topic Kafka.
-    Le consumer déclenchera le recalcul du report pour (gilet_id, date_key).
-    """
     if _producer is None:
         logger.warning("[Kafka Producer] Non initialisé, événement ignoré")
         return

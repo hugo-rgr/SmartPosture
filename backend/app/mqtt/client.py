@@ -34,24 +34,21 @@ def init_mqtt_handlers(posture_service, kafka_producer_fn=None):
             gilet_id = data.get("id")
             logger.info(f"[MQTT] Message reçu sur '{topic}': gilet={gilet_id}")
 
-            # 1. Sauvegarde en base (timestamp enrichi)
             posture_id, gilet_id, date_key = await posture_service.save_posture(data)
             logger.info(f"[MQTT] Posture sauvegardée (id={posture_id})")
 
-            # 2. Broadcast WebSocket — payload original complet vers le front
             from app.websocket.manager import manager
             ws_payload = {
                 "id":         data.get("id"),
-                "timestamp":  data.get("timestamp"),   # timestamp brut broker
+                "timestamp":  data.get("timestamp"),
                 "activity":   data.get("activity"),
                 "posture":    data.get("posture"),
                 "angle_diff": data.get("angle_diff"),
                 "sensorHigh": data.get("sensorHigh"),
                 "sensorLow":  data.get("sensorLow"),
             }
-            await manager.broadcast_to_gilet(gilet_id, ws_payload)
+            await manager.broadcast(ws_payload)
 
-            # 3. Événement Kafka → recalcul du report
             if kafka_producer_fn:
                 await kafka_producer_fn(gilet_id, date_key, posture_id)
 
