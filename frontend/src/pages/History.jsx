@@ -10,13 +10,20 @@ export default function History() {
     posture: 'all',
     giletId: ''
   });
+  const [currentPage, setCurrentPage] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [refreshCount, setRefreshCount] = useState(0);
+  const PAGE_SIZE = 50;
 
   useEffect(() => {
-    fetchWithAuth('http://localhost:8000/api/v1/postures')
+    fetchWithAuth(`http://localhost:8000/api/v1/postures?skip=${currentPage * PAGE_SIZE}&limit=${PAGE_SIZE}`)
       .then(res => res.json())
-      .then(data => setHistory(Array.isArray(data.data) ? data.data : []))
+      .then(data => {
+        setHistory(Array.isArray(data.data) ? data.data : []);
+        setTotal(typeof data.total === 'number' ? data.total : 0);
+      })
       .catch(err => console.error(err));
-  }, []);
+  }, [currentPage, refreshCount]);
 
   const getPostureDisplay = (posture) => {
     switch(posture) {
@@ -40,8 +47,20 @@ export default function History() {
     if (filters.giletId && !item.gilet_id?.toLowerCase().includes(filters.giletId.toLowerCase())) return false;
     if (filters.posture !== 'all' && item.posture !== filters.posture) return false;
     if (filters.activity !== 'all' && item.activity !== filters.activity) return false;
+    // Filtre date locale (YYYY-MM-DD)
+    if (filters.date) {
+      const itemDate = new Date(item.timestamp).toISOString().slice(0, 10);
+      if (itemDate !== filters.date) return false;
+    }
     return true;
   });
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  // Bouton de rafraîchissement
+  const handleRefresh = () => {
+    setRefreshCount(c => c + 1);
+  };
 
   return (
     <div className="space-y-6">
@@ -54,7 +73,10 @@ export default function History() {
             <input
               type="date"
               value={filters.date}
-              onChange={(e) => setFilters({...filters, date: e.target.value})}
+              onChange={(e) => {
+                setCurrentPage(0);
+                setFilters({...filters, date: e.target.value});
+              }}
               className="w-full border border-gray-300 rounded-md px-3 py-2"
             />
           </div>
@@ -64,7 +86,10 @@ export default function History() {
               type="text"
               placeholder="Rechercher par ID..."
               value={filters.giletId}
-              onChange={e => setFilters({...filters, giletId: e.target.value})}
+              onChange={e => {
+                setCurrentPage(0);
+                setFilters({...filters, giletId: e.target.value});
+              }}
               className="w-full border border-gray-300 rounded-md px-3 py-2 font-mono"
             />
           </div>
@@ -72,7 +97,10 @@ export default function History() {
             <label className="block text-sm font-medium text-gray-700 mb-2">Activité</label>
             <select
               value={filters.activity}
-              onChange={(e) => setFilters({...filters, activity: e.target.value})}
+              onChange={(e) => {
+                setCurrentPage(0);
+                setFilters({...filters, activity: e.target.value});
+              }}
               className="w-full border border-gray-300 rounded-md px-3 py-2"
             >
               <option value="all">Toutes</option>
@@ -86,7 +114,10 @@ export default function History() {
             <label className="block text-sm font-medium text-gray-700 mb-2">Posture</label>
             <select
               value={filters.posture}
-              onChange={(e) => setFilters({...filters, posture: e.target.value})}
+              onChange={(e) => {
+                setCurrentPage(0);
+                setFilters({...filters, posture: e.target.value});
+              }}
               className="w-full border border-gray-300 rounded-md px-3 py-2"
             >
               <option value="all">Toutes</option>
@@ -211,6 +242,34 @@ export default function History() {
             Aucune donnée trouvée
           </div>
         )}
+      </div>
+      {/* Pagination et rafraîchissement */}
+      <div className="flex items-center py-4 justify-between w-full">
+        <div className="flex-1 flex justify-center">
+          <div className="flex items-center gap-4">
+            <button
+              className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+              onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+              disabled={currentPage === 0}
+            >
+              Précédent
+            </button>
+            <span className="text-sm">Page {currentPage + 1} sur {totalPages}</span>
+            <button
+              className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+              onClick={() => setCurrentPage(p => p + 1)}
+              disabled={currentPage + 1 >= totalPages}
+            >
+              Suivant
+            </button>
+          </div>
+        </div>
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 ml-4"
+          onClick={handleRefresh}
+        >
+          Rafraîchir
+        </button>
       </div>
     </div>
   );
