@@ -14,7 +14,7 @@ export default function History() {
   useEffect(() => {
     fetchWithAuth('http://localhost:8000/api/v1/postures')
       .then(res => res.json())
-      .then(data => setHistory(data))
+      .then(data => setHistory(Array.isArray(data.data) ? data.data : []))
       .catch(err => console.error(err));
   }, []);
 
@@ -37,7 +37,7 @@ export default function History() {
   };
 
   const filteredHistory = history.filter(item => {
-    if (filters.giletId && !item.id?.toLowerCase().includes(filters.giletId.toLowerCase())) return false;
+    if (filters.giletId && !item.gilet_id?.toLowerCase().includes(filters.giletId.toLowerCase())) return false;
     if (filters.posture !== 'all' && item.posture !== filters.posture) return false;
     if (filters.activity !== 'all' && item.activity !== filters.activity) return false;
     return true;
@@ -107,14 +107,12 @@ export default function History() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Activité</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Posture</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Angle Diff</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alerte</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Détails</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {filteredHistory.map((item, index) => {
               const postureInfo = getPostureDisplay(item.posture);
-              const isAlert = item.posture === 'BAD_POSTURE';
 
               return (
                 <>
@@ -123,7 +121,7 @@ export default function History() {
                       {new Date(item.timestamp).toLocaleString('fr-FR')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
-                      {item.id}
+                      {item.gilet_id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {getActivityDisplay(item.activity)}
@@ -137,13 +135,6 @@ export default function History() {
                       {item.angle_diff?.toFixed(2)}°
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {isAlert ? (
-                        <span className="text-red-600 font-medium">⚠️ Oui</span>
-                      ) : (
-                        <span className="text-gray-400">Non</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <button
                         onClick={() => setExpandedRow(expandedRow === index ? null : index)}
                         className="text-blue-600 hover:text-blue-800 font-medium"
@@ -154,7 +145,7 @@ export default function History() {
                   </tr>
                   {expandedRow === index && (
                     <tr>
-                      <td colSpan="7" className="px-6 py-4 bg-gray-50">
+                      <td colSpan="6" className="px-6 py-4 bg-gray-50">
                         {/* Capteur Haut */}
                         <div className="mb-4">
                           <h4 className="text-sm font-semibold text-gray-700 mb-2">Capteur Haut (Épaules)</h4>
