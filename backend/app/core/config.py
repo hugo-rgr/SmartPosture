@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     MONGO_DB_NAME: str = "safewear"
 
     # JWT
-    JWT_SECRET_KEY: str = "change-this-secret-in-production"
+    JWT_SECRET_KEY: str = "secret!secret!secret!"
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 

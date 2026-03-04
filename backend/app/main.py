@@ -29,7 +29,6 @@ mqtt_connected = False
 kafka_enabled = False
 
 
-# App créée AVANT le lifespan pour que mqtt.init_app(app) fonctionne
 app = FastAPI(
     title="SafeWear Posture API",
     description="API REST pour la collecte et la consultation des données de posture des gilets SafeWear.",
@@ -47,7 +46,7 @@ app.add_middleware(
 app.include_router(auth_router,    prefix="/api/v1")
 app.include_router(posture_router, prefix="/api/v1")
 app.include_router(report_router,  prefix="/api/v1")
-app.include_router(ws_router)  # pas de prefix /api/v1 — ws:// n'utilise pas ce schéma
+app.include_router(ws_router)
 
 
 @app.get("/", tags=["Health"])
@@ -71,7 +70,6 @@ async def startup():
     logger.info("Démarrage de l'application SafeWear API...")
     await connect_db()
 
-    # --- Kafka ---
     if settings.KAFKA_ENABLED:
         try:
             await start_producer()
@@ -82,17 +80,12 @@ async def startup():
             logger.warning(f"[Kafka] Impossible de démarrer: {e}")
             logger.warning("[Kafka] L'API démarre sans Kafka.")
 
-    # --- MQTT ---
     if settings.MQTT_ENABLED:
-        # Les handlers doivent être enregistrés AVANT mqtt_startup
         kafka_fn = publish_posture_created if kafka_enabled else None
         init_mqtt_handlers(posture_service, kafka_producer_fn=kafka_fn)
 
-        # mqtt_startup ouvre la connexion TCP vers le broker
-        # Si ça lève une exception, la stack trace complète sera visible
         await mqtt.mqtt_startup()
 
-        # init_app attache le client MQTT au cycle de vie de l'app FastAPI
         mqtt.init_app(app)
 
         mqtt_connected = True

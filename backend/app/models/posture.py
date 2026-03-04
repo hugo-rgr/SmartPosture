@@ -15,8 +15,6 @@ class SensorData(BaseModel):
 class PostureModel(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
     gilet_id: str
-    # timestamp enrichi : préfixe YYYYMMDD + timestamp original
-    # ex: timestamp broker = 9999 → stocké 202603039999
     timestamp: int
     date_key: str      # "20260303" — clé de jointure avec le report
     activity: str

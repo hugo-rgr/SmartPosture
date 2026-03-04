@@ -13,7 +13,6 @@ class AuthService:
     async def register(self, payload: UserRegisterSchema) -> UserResponseSchema:
         col = self._collection()
 
-        # Unicité username / email
         existing = await col.find_one({
             "$or": [{"username": payload.username}, {"email": payload.email}]
         })

@@ -12,7 +12,6 @@ _consumer_task: asyncio.Task = None
 
 
 async def _consume_loop(report_service):
-    """Boucle de consommation Kafka — tourne en arrière-plan."""
     consumer = AIOKafkaConsumer(
         settings.KAFKA_TOPIC_POSTURE,
         bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,

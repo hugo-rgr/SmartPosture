@@ -14,7 +14,6 @@ def _serialize(doc: dict) -> ReportResponseSchema:
 
 
 def _compute_std(values: List[float], mean: float) -> float:
-    """Écart-type population."""
     if len(values) < 2:
         return 0.0
     variance = sum((v - mean) ** 2 for v in values) / len(values)
@@ -22,11 +21,6 @@ def _compute_std(values: List[float], mean: float) -> float:
 
 
 def _compute_streaks(postures: List[str]) -> tuple[int, int]:
-    """
-    Calcule la plus longue série consécutive de mauvaises postures
-    et le nombre total de séquences mauvaises.
-    Une 'mauvaise' posture est tout ce qui n'est pas 'GOOD_POSTURE'.
-    """
     max_streak = 0
     streak_count = 0
     current = 0
@@ -56,15 +50,9 @@ class ReportService:
         return get_database()["posture"]
 
     async def compute_and_save_report(self, gilet_id: str, date_key: str) -> ReportResponseSchema:
-        """
-        Agrège toutes les postures du gilet pour le jour donné,
-        calcule les métriques et upsert le report en base.
-        Appelé par le consumer Kafka à chaque nouvelle posture.
-        """
         col_p = self._col_posture()
         col_r = self._col_report()
 
-        # Récupérer toutes les postures du jour, triées par timestamp
         cursor = col_p.find(
             {"gilet_id": gilet_id, "date_key": date_key},
             {"posture": 1, "angle_diff": 1, "activity": 1, "_id": 0}
@@ -77,29 +65,24 @@ class ReportService:
                 detail=f"Aucune posture pour gilet={gilet_id} date={date_key}"
             )
 
-        # --- Extraction des séries ---
         postures      = [d["posture"] for d in docs]
         angle_diffs   = [d["angle_diff"] for d in docs]
         activities    = [d["activity"] for d in docs]
 
-        # --- Compteurs posture ---
         total         = len(postures)
         good          = sum(1 for p in postures if p == "GOOD_POSTURE")
         bad           = total - good
 
-        # --- Stats angle ---
         angle_mean    = round(sum(angle_diffs) / total, 4)
         angle_max     = round(max(angle_diffs), 4)
         angle_min     = round(min(angle_diffs), 4)
         angle_std     = _compute_std(angle_diffs, angle_mean)
 
-        # --- Activités ---
         activity_counts: dict = {}
         for a in activities:
             activity_counts[a] = activity_counts.get(a, 0) + 1
         most_common = max(activity_counts, key=activity_counts.get)
 
-        # --- Séquences de mauvaise posture ---
         max_streak, streak_count = _compute_streaks(postures)
 
         report_doc = {
@@ -121,7 +104,6 @@ class ReportService:
             "last_updated_at":        int(time.time()),
         }
 
-        # Upsert : 1 report par (gilet_id, date_key)
         result = await col_r.find_one_and_replace(
             {"gilet_id": gilet_id, "date_key": date_key},
             report_doc,
@@ -129,8 +111,6 @@ class ReportService:
             return_document=True,
         )
 
-        # find_one_and_replace renvoie l'ancien doc si return_document=False (défaut)
-        # On re-fetch pour être sûr d'avoir le doc avec _id
         saved = await col_r.find_one({"gilet_id": gilet_id, "date_key": date_key})
         return _serialize(saved)
 

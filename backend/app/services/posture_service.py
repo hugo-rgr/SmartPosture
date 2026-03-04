@@ -8,16 +8,9 @@ from app.schemas.posture import PostureResponseSchema, PostureListResponseSchema
 
 
 def _build_timestamp() -> tuple[int, str]:
-    """
-    Génère un timestamp à la seconde au moment de l'enregistrement en base.
-    Le timestamp du broker est ignoré et écrasé.
-    Ex: datetime.now() = 2026-03-03 14:32:07 UTC
-        → timestamp = 1741012327 (Unix secondes)
-        → date_key  = "20260303"
-    """
     now = datetime.now(timezone.utc)
     date_key = now.strftime("%Y%m%d")
-    timestamp = int(now.timestamp())   # Unix timestamp à la seconde
+    timestamp = int(now.timestamp())
     return timestamp, date_key
 
 
@@ -32,10 +25,6 @@ class PostureService:
         return get_database()["posture"]
 
     async def save_posture(self, payload: dict) -> tuple[str, str, str]:
-        """
-        Persiste une posture MQTT en base.
-        Retourne (inserted_id, gilet_id, date_key) pour le producer Kafka.
-        """
         col = self._collection()
 
         timestamp, date_key = _build_timestamp()
