@@ -55,12 +55,16 @@ async def create_posture(
 async def get_all_postures(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
-    gilet_id: Optional[str] = Query(None, description="Filtrer par identifiant de gilet"),
-    date_key: Optional[str] = Query(None, description="Filtrer par date (YYYYMMDD)"),
+    gilet_id: Optional[str] = Query(None, description="Filtrer par identifiant de gilet (ex: gilet_01)"),
+    date_key: Optional[str] = Query(None, description="Filtrer par date (YYYYMMDD, ex: 20260303)"),
+    posture: Optional[str] = Query(None, description="Filtrer par posture (ex: GOOD_POSTURE, BAD_POSTURE)"),
+    activity: Optional[str] = Query(None, description="Filtrer par activité (ex: STAND_UP, SIT_DOWN)"),
     _: dict = Depends(get_current_user),
 ):
     return await posture_service.get_all_postures(
-        skip=skip, limit=limit, gilet_id=gilet_id, date_key=date_key
+        skip=skip, limit=limit,
+        gilet_id=gilet_id, date_key=date_key,
+        posture=posture, activity=activity,
     )
 
 

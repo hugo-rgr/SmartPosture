@@ -59,6 +59,8 @@ class PostureService:
         limit: int = 50,
         gilet_id: Optional[str] = None,
         date_key: Optional[str] = None,
+        posture: Optional[str] = None,
+        activity: Optional[str] = None,
     ) -> PostureListResponseSchema:
         col = self._collection()
         query = {}
@@ -66,6 +68,10 @@ class PostureService:
             query["gilet_id"] = gilet_id
         if date_key:
             query["date_key"] = date_key
+        if posture:
+            query["posture"] = posture
+        if activity:
+            query["activity"] = activity
 
         total = await col.count_documents(query)
         cursor = col.find(query).skip(skip).limit(limit).sort("timestamp", -1)
