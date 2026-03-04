@@ -50,7 +50,7 @@ export default function History() {
       case 'STAND_UP': return 'Debout';
       case 'SIT_DOWN': return 'Assis';
       case 'LAY_DOWN': return 'Couché';
-      case 'UNKNOWN': return 'Inconnu';
+      case 'UNKNOWN': return 'Inconnue';
       default: return activity;
     }
   };
@@ -76,6 +76,10 @@ export default function History() {
 
   return (
     <div className="space-y-6">
+
+      <div className="flex justify-between items-center">
+        <h2 className="text-3xl font-bold text-gray-900">Historique</h2>
+      </div>
 
       {/* Filtres */}
       <div className="bg-white rounded-lg shadow p-4">
@@ -119,7 +123,7 @@ export default function History() {
               <option value="STAND_UP">Debout</option>
               <option value="SIT_DOWN">Assis</option>
               <option value="LAY_DOWN">Couché</option>
-              <option value="UNKNOWN">Inconnu</option>
+              <option value="UNKNOWN">Inconnue</option>
             </select>
           </div>
           <div>
@@ -191,7 +195,7 @@ export default function History() {
                       <td colSpan="6" className="px-6 py-4 bg-gray-50">
                         {/* Capteur Haut */}
                         <div className="mb-4">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2">Capteur Haut (Épaules)</h4>
+                          <h4 className="text-sm font-semibold text-gray-700 mb-2">Capteur Haut (Omoplates)</h4>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <p className="text-xs font-medium text-gray-600 mb-1">Accéléromètre (m/s²)</p>
@@ -214,7 +218,7 @@ export default function History() {
 
                         {/* Capteur Bas */}
                         <div className="mb-3">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2">Capteur Bas (Bassin)</h4>
+                          <h4 className="text-sm font-semibold text-gray-700 mb-2">Capteur Bas (Lombaires)</h4>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <p className="text-xs font-medium text-gray-600 mb-1">Accéléromètre (m/s²)</p>

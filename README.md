@@ -336,8 +336,8 @@ MQTT_PORT=1883
 ## Détection de Posture
 
 Le système utilise 2 capteurs IMU (MPU6050) :
-- **Capteur haut** : placé au niveau des épaules
-- **Capteur bas** : placé au niveau du bassin
+- **Capteur haut** : placé entre les deux omoplates
+- **Capteur bas** : placé au niveau des lombaires
 
 Classification :
 - **Bonne posture** : différence d'angle ≤ 25°

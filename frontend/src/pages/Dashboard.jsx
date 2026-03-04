@@ -3,7 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import useWebSocket from '../utils/useWebSocket';
 
 export default function Dashboard() {
-  const { data, isConnected } = useWebSocket('ws://localhost:8000/ws/posture');
+  const { data } = useWebSocket('ws://localhost:8000/ws/posture');
   // Stocke l'historique des données par gilet
   const [giletData, setGiletData] = useState({}); // { [giletId]: [data, ...] }
   const [selectedId, setSelectedId] = useState('gilet_01');
@@ -13,18 +13,22 @@ export default function Dashboard() {
     if (data) {
       // Ajoute dynamiquement les nouveaux gilets détectés
       if (data.id) {
-        setAvailableIds(prev => prev.includes(data.id) ? prev : [...prev, data.id]);
-        // Met à jour l'historique du gilet concerné
-        setGiletData(prev => {
-          const prevArr = prev[data.id] || [];
-          return {
-            ...prev,
-            [data.id]: [
-              ...prevArr.slice(-59),
-              data
-            ]
-          };
-        });
+        if (data.status !== 'DISCONNECTED') {
+          setAvailableIds(prev => prev.includes(data.id) ? prev : [...prev, data.id]);
+          // Met à jour l'historique du gilet concerné
+          setGiletData(prev => {
+            const prevArr = prev[data.id] || [];
+            // Limite à 12 points
+            const newArr = [...prevArr, data];
+            if (newArr.length > 12) {
+              newArr.shift(); // retire le plus ancien
+            }
+            return {
+              ...prev,
+              [data.id]: newArr
+            };
+          });
+        }
       }
     }
   }, [data]);
@@ -62,13 +66,29 @@ export default function Dashboard() {
       case 'STAND_UP': return 'Debout';
       case 'SIT_DOWN': return 'Assis';
       case 'LAY_DOWN': return 'Couché';
-      case 'UNKNOWN': return 'Inconnu';
-      default: return 'Inconnu';
+      case 'UNKNOWN': return 'Inconnue';
+      default: return 'Inconnue';
     }
   };
 
   const postureInfo = getPostureDisplay(currentData?.posture);
   const isAlert = currentData?.posture === 'BAD_POSTURE';
+
+  // Tooltip personnalisé pour afficher l'activité
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white p-3 rounded shadow text-sm border border-gray-200">
+          <div><span className="font-semibold">Heure :</span> {label}</div>
+          <div><span className="font-semibold">Angle :</span> {data.angle_diff?.toFixed(2)}°</div>
+          <div><span className="font-semibold">Posture :</span> {getPostureDisplay(data.posture).label}</div>
+          <div><span className="font-semibold">Activité :</span> {getActivityDisplay(data.activity)}</div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="space-y-6">
@@ -90,8 +110,8 @@ export default function Dashboard() {
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold text-gray-900">Dashboard Temps Réel</h2>
         <div className="flex items-center space-x-2">
-          <div className={`h-3 w-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-          <span className="text-sm text-gray-600">{isConnected ? 'Connecté' : 'Déconnecté'}</span>
+          <div className={`h-3 w-3 rounded-full ${currentData?.status === 'CONNECTED' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+          <span className="text-sm text-gray-600">{currentData?.status === 'CONNECTED' ? 'Connecté' : 'Déconnecté'}</span>
         </div>
       </div>
 
@@ -156,9 +176,9 @@ export default function Dashboard() {
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="time" label={{ value: 'Temps', offset: 10, position: 'insideBottom' }} />
+            <XAxis dataKey="time" label={{ value: 'Temps', offset: 0, position: 'insideBottom' }} />
             <YAxis label={{ value: 'Degrés (°)', angle: -90, position: 'insideLeft' }} />
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
             <Line type="monotone" dataKey="angle_diff" stroke="#3b82f6" name="Différence angle" strokeWidth={2} dot={customDot} />
           </LineChart>
         </ResponsiveContainer>
@@ -180,7 +200,7 @@ export default function Dashboard() {
 
         {/* Capteur Haut */}
         <div className="mb-6">
-          <h4 className="text-md font-medium text-gray-700 mb-3">Capteur Haut (Épaules)</h4>
+          <h4 className="text-md font-medium text-gray-700 mb-3">Capteur Haut (Omoplates)</h4>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-2">Accéléromètre (m/s²)</p>
@@ -203,7 +223,7 @@ export default function Dashboard() {
 
         {/* Capteur Bas */}
         <div>
-          <h4 className="text-md font-medium text-gray-700 mb-3">Capteur Bas (Bassin)</h4>
+          <h4 className="text-md font-medium text-gray-700 mb-3">Capteur Bas (Lombaires)</h4>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-2">Accéléromètre (m/s²)</p>

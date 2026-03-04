@@ -73,7 +73,7 @@ export default function Stats() {
         activité: activity === 'STAND_UP' ? 'Debout' :
                   activity === 'SIT_DOWN' ? 'Assis' :
                   activity === 'LAY_DOWN' ? 'Couché' :
-                  activity === 'UNKNOWN' ? 'Inconnu' : activity,
+                  activity === 'UNKNOWN' ? 'Inconnue' : activity,
         nombre: count
       }))
     : [];
@@ -87,7 +87,7 @@ export default function Stats() {
   if (!selectedStats) {
     return (
       <div className="space-y-6">
-        <h2 className="text-3xl font-bold text-gray-900">Statistiques HSE</h2>
+        <h2 className="text-3xl font-bold text-gray-900">Statistiques</h2>
         <div className="bg-white rounded-lg shadow p-12 text-center text-gray-500">
           Aucune donnée disponible
         </div>
@@ -242,7 +242,7 @@ export default function Stats() {
               {selectedStats.most_common_activity === 'STAND_UP' ? 'Debout' :
                selectedStats.most_common_activity === 'SIT_DOWN' ? 'Assis' :
                selectedStats.most_common_activity === 'LAY_DOWN' ? 'Couché' :
-               selectedStats.most_common_activity === 'UNKNOWN' ? 'Inconnu' :
+               selectedStats.most_common_activity === 'UNKNOWN' ? 'Inconnue' :
                selectedStats.most_common_activity}
             </span>
           </p>
