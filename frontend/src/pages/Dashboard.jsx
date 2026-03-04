@@ -176,7 +176,7 @@ export default function Dashboard() {
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="time" label={{ value: 'Temps', offset: 10, position: 'insideBottom' }} />
+            <XAxis dataKey="time" label={{ value: 'Temps', offset: 0, position: 'insideBottom' }} />
             <YAxis label={{ value: 'Degrés (°)', angle: -90, position: 'insideLeft' }} />
             <Tooltip content={<CustomTooltip />} />
             <Line type="monotone" dataKey="angle_diff" stroke="#3b82f6" name="Différence angle" strokeWidth={2} dot={customDot} />
