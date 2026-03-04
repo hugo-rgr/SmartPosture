@@ -4,6 +4,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import History from './pages/History';
+import Stats from "./pages/Stats";
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
         >
           <Route index element={<Dashboard />} />
           <Route path="history" element={<History />} />
+          <Route path="stats" element={<Stats />} />
         </Route>
 
         {/* Redirection par défaut */}

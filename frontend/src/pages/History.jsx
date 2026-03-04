@@ -11,19 +11,31 @@ export default function History() {
     giletId: ''
   });
   const [currentPage, setCurrentPage] = useState(0);
-  const [total, setTotal] = useState(0);
   const [refreshCount, setRefreshCount] = useState(0);
   const PAGE_SIZE = 50;
+  const [total, setTotal] = useState(0);
 
+  // Construction dynamique de l'URL avec pagination et filtres
   useEffect(() => {
-    fetchWithAuth(`http://localhost:8000/api/v1/postures?skip=${currentPage * PAGE_SIZE}&limit=${PAGE_SIZE}`)
+    const params = new URLSearchParams();
+    params.append('skip', currentPage * PAGE_SIZE);
+    params.append('limit', PAGE_SIZE);
+    if (filters.giletId) params.append('gilet_id', filters.giletId);
+    if (filters.posture !== 'all' && filters.posture) params.append('posture', filters.posture);
+    if (filters.activity !== 'all' && filters.activity) params.append('activity', filters.activity);
+    if (filters.date) {
+      // Conversion de la date (YYYY-MM-DD) en format attendu par l'API (YYYYMMDD)
+      const dateKey = filters.date.replaceAll('-', '');
+      params.append('date_key', dateKey);
+    }
+    fetchWithAuth(`http://localhost:8000/api/v1/postures?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
         setHistory(Array.isArray(data.data) ? data.data : []);
         setTotal(typeof data.total === 'number' ? data.total : 0);
       })
       .catch(err => console.error(err));
-  }, [currentPage, refreshCount]);
+  }, [currentPage, filters, refreshCount]);
 
   const getPostureDisplay = (posture) => {
     switch(posture) {
@@ -43,23 +55,23 @@ export default function History() {
     }
   };
 
-  const filteredHistory = history.filter(item => {
-    if (filters.giletId && !item.gilet_id?.toLowerCase().includes(filters.giletId.toLowerCase())) return false;
-    if (filters.posture !== 'all' && item.posture !== filters.posture) return false;
-    if (filters.activity !== 'all' && item.activity !== filters.activity) return false;
-    // Filtre date locale (YYYY-MM-DD)
-    if (filters.date) {
-      const itemDate = new Date(item.timestamp).toISOString().slice(0, 10);
-      if (itemDate !== filters.date) return false;
-    }
-    return true;
-  });
-
+  // Pagination sur les données reçues (plus de slice côté client)
+  const paginatedHistory = history;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
 
   // Bouton de rafraîchissement
   const handleRefresh = () => {
     setRefreshCount(c => c + 1);
+  };
+
+  // Utilitaire pour convertir le timestamp (secondes ou millisecondes) en Date JS
+  const parseTimestamp = (ts) => {
+    if (!ts) return null;
+    // Si le timestamp est en secondes (10 chiffres), convertir en ms
+    if (typeof ts === 'number' && ts < 1e12) return new Date(ts * 1000);
+    // Sinon, supposer millisecondes
+    return new Date(ts);
   };
 
   return (
@@ -142,14 +154,14 @@ export default function History() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {filteredHistory.map((item, index) => {
+            {paginatedHistory.map((item, index) => {
               const postureInfo = getPostureDisplay(item.posture);
-
+              const globalIndex = currentPage * PAGE_SIZE + index;
               return (
                 <>
-                  <tr key={item._id || index} className="hover:bg-gray-50">
+                  <tr key={item._id || globalIndex} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(item.timestamp).toLocaleString('fr-FR')}
+                      {parseTimestamp(item.timestamp)?.toLocaleString('fr-FR')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
                       {item.gilet_id}
@@ -167,14 +179,14 @@ export default function History() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <button
-                        onClick={() => setExpandedRow(expandedRow === index ? null : index)}
+                        onClick={() => setExpandedRow(expandedRow === globalIndex ? null : globalIndex)}
                         className="text-blue-600 hover:text-blue-800 font-medium"
                       >
-                        {expandedRow === index ? '▲ Masquer' : '▼ Voir'}
+                        {expandedRow === globalIndex ? '▲ Masquer' : '▼ Voir'}
                       </button>
                     </td>
                   </tr>
-                  {expandedRow === index && (
+                  {expandedRow === globalIndex && (
                     <tr>
                       <td colSpan="6" className="px-6 py-4 bg-gray-50">
                         {/* Capteur Haut */}
@@ -223,12 +235,6 @@ export default function History() {
                           </div>
                         </div>
 
-                        <div className="mt-3 pt-3 border-t border-gray-200">
-                          <p className="text-xs text-gray-500">
-                            <span className="font-medium">Timestamp:</span> {item.timestamp}ms |
-                            <span className="font-medium"> Différence angle:</span> {item.angle_diff?.toFixed(2)}°
-                          </p>
-                        </div>
                       </td>
                     </tr>
                   )}
@@ -237,7 +243,7 @@ export default function History() {
             })}
           </tbody>
         </table>
-        {filteredHistory.length === 0 && (
+        {paginatedHistory.length === 0 && (
           <div className="text-center py-12 text-gray-500">
             Aucune donnée trouvée
           </div>

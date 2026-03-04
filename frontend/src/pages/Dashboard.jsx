@@ -3,19 +3,28 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import useWebSocket from '../utils/useWebSocket';
 
 export default function Dashboard() {
-  const { data, isConnected } = useWebSocket('ws://localhost:3001');
+  const { data, isConnected } = useWebSocket('ws://localhost:8000/ws/posture');
   const [chartData, setChartData] = useState([]);
   const [currentData, setCurrentData] = useState(null);
+  const [selectedId, setSelectedId] = useState('gilet_01');
+  const [availableIds, setAvailableIds] = useState(['gilet_01']);
 
   useEffect(() => {
     if (data) {
-      setCurrentData(data);
-      setChartData(prev => [...prev.slice(-59), {
-        time: new Date(data.timestamp).toLocaleTimeString(),
-        angle_diff: data.angle_diff || 0
-      }]);
+      // Met à jour la liste des gilet_id disponibles dynamiquement
+      if (data.id && !availableIds.includes(data.id)) {
+        setAvailableIds(prev => [...prev, data.id]);
+      }
+      // Filtre les données selon le gilet_id sélectionné
+      if (data.id === selectedId) {
+        setCurrentData(data);
+        setChartData(prev => [...prev.slice(-59), {
+          time: new Date(data.timestamp).toLocaleTimeString(),
+          angle_diff: data.angle_diff || 0
+        }]);
+      }
     }
-  }, [data]);
+  }, [data, selectedId, availableIds]);
 
   const getPostureDisplay = (posture) => {
     switch(posture) {
@@ -40,6 +49,20 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Sélecteur d'ID de gilet */}
+      <div className="flex justify-end items-center mb-2">
+        <label htmlFor="gilet-select" className="mr-2 text-sm text-gray-700 font-medium">Gilet :</label>
+        <select
+          id="gilet-select"
+          value={selectedId}
+          onChange={e => setSelectedId(e.target.value)}
+          className="border rounded px-2 py-1 text-sm"
+        >
+          {availableIds.map(id => (
+            <option key={id} value={id}>{id}</option>
+          ))}
+        </select>
+      </div>
       {/* En-tête */}
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold text-gray-900">Dashboard Temps Réel</h2>
