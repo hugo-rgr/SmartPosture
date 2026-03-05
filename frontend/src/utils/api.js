@@ -24,7 +24,7 @@ export async function fetchWithAuth(url, options = {}) {
   // Si 401 Unauthorized, déconnecter l'utilisateur
   if (response.status === 401) {
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem('token_type');
     window.location.href = '/login';
     throw new Error('Session expirée');
   }
