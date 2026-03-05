@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import useWebSocket from '../utils/useWebSocket';
+import {WS_BASE_URL} from "../utils/api.js";
 
 export default function Dashboard() {
-  const { data } = useWebSocket('ws://localhost:8000/ws/posture');
+  const { data } = useWebSocket(`${WS_BASE_URL}/ws/posture`);
   // Stocke l'historique des données par gilet
   const [giletData, setGiletData] = useState({}); // { [giletId]: [data, ...] }
   const [selectedId, setSelectedId] = useState('gilet_01');
@@ -18,7 +19,7 @@ export default function Dashboard() {
           // Met à jour l'historique du gilet concerné
           setGiletData(prev => {
             const prevArr = prev[data.id] || [];
-            // Limite à 12 points
+            // Limite à 12 points sur le graphique
             const newArr = [...prevArr, data];
             if (newArr.length > 12) {
               newArr.shift(); // retire le plus ancien
@@ -74,7 +75,7 @@ export default function Dashboard() {
   const postureInfo = getPostureDisplay(currentData?.posture);
   const isAlert = currentData?.posture === 'BAD_POSTURE';
 
-  // Tooltip personnalisé pour afficher l'activité
+  // Tooltip personnalisé pour afficher l'activité pour les points du graphique
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;

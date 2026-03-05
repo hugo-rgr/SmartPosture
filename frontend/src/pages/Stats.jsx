@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { fetchWithAuth } from '../utils/api';
 
 export default function Stats() {
@@ -11,19 +11,18 @@ export default function Stats() {
   const [uniqueGiletIds, setUniqueGiletIds] = useState([]);
 
   useEffect(() => {
-    fetchWithAuth('http://localhost:8000/api/v1/reports')
+    fetchWithAuth('/api/v1/reports')
       .then(res => res.json())
       .then(response => {
         const stats = response.data || [];
         setAllStats(stats);
 
-        // Extraire les gilet_id uniques
         const giletIds = [...new Set(stats.map(s => s.gilet_id))];
         setUniqueGiletIds(giletIds);
 
         // Par défaut : afficher la dernière stat (la plus récente)
         if (stats.length > 0) {
-          const latest = stats[0]; // Backend retourne déjà trié par date décroissante
+          const latest = stats[0];
           setSelectedStats(latest);
           setSelectedGiletId(latest.gilet_id);
           setSelectedDate(latest.date_key);
@@ -41,12 +40,11 @@ export default function Stats() {
         .sort((a, b) => b.localeCompare(a)); // Tri décroissant
       setAvailableDates(dates);
 
-      // Si la date sélectionnée n'existe pas pour ce gilet, prendre la première disponible
       if (!dates.includes(selectedDate) && dates.length > 0) {
         setSelectedDate(dates[0]);
       }
     }
-  }, [selectedGiletId, allStats]);
+  }, [selectedGiletId, selectedDate, allStats]);
 
   // Mettre à jour les stats affichées quand gilet_id ou date change
   useEffect(() => {
@@ -70,7 +68,7 @@ export default function Stats() {
   // Données pour le graphique en barres (activités)
   const activityData = selectedStats?.activity_counts
     ? Object.entries(selectedStats.activity_counts).map(([activity, count]) => ({
-        activité: activity === 'STAND_UP' ? 'Debout' :
+        activite: activity === 'STAND_UP' ? 'Debout' :
                   activity === 'SIT_DOWN' ? 'Assis' :
                   activity === 'LAY_DOWN' ? 'Couché' :
                   activity === 'UNKNOWN' ? 'Inconnue' : activity,
@@ -78,7 +76,7 @@ export default function Stats() {
       }))
     : [];
 
-  // Données pour le camembert (répartition postures)
+  // Données pour le pie chart (répartition postures)
   const postureData = selectedStats ? [
     { name: 'Bonne', value: selectedStats.good_postures, color: '#10b981' },
     { name: 'Mauvaise', value: selectedStats.bad_postures, color: '#ef4444' }
@@ -231,7 +229,7 @@ export default function Stats() {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={activityData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="activité" />
+              <XAxis dataKey="activite" />
               <YAxis />
               <Tooltip />
               <Bar dataKey="nombre" fill="#3b82f6" />

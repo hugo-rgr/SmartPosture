@@ -1,20 +1,11 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 
 export default function Layout() {
-  const [user, setUser] = useState(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem('token_type');
     navigate('/login');
   };
 

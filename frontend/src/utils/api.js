@@ -1,3 +1,7 @@
+
+export const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
+export const WS_BASE_URL = API_BASE_URL.replace(/^http/, 'ws');
+
 export async function fetchWithAuth(url, options = {}) {
   const token = localStorage.getItem('token');
 
@@ -10,7 +14,9 @@ export async function fetchWithAuth(url, options = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(url, {
+  const fullUrl = `${API_BASE_URL}${url}`;
+
+  const response = await fetch(fullUrl, {
     ...options,
     headers,
   });

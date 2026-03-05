@@ -28,7 +28,7 @@ export default function History() {
       const dateKey = filters.date.replaceAll('-', '');
       params.append('date_key', dateKey);
     }
-    fetchWithAuth(`http://localhost:8000/api/v1/postures?${params.toString()}`)
+    fetchWithAuth(`/api/v1/postures?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
         setHistory(Array.isArray(data.data) ? data.data : []);
@@ -55,22 +55,16 @@ export default function History() {
     }
   };
 
-  // Pagination sur les données reçues (plus de slice côté client)
   const paginatedHistory = history;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-
-  // Bouton de rafraîchissement
   const handleRefresh = () => {
     setRefreshCount(c => c + 1);
   };
 
-  // Utilitaire pour convertir le timestamp (secondes ou millisecondes) en Date JS
   const parseTimestamp = (ts) => {
     if (!ts) return null;
-    // Si le timestamp est en secondes (10 chiffres), convertir en ms
     if (typeof ts === 'number' && ts < 1e12) return new Date(ts * 1000);
-    // Sinon, supposer millisecondes
     return new Date(ts);
   };
 
